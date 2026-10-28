@@ -1,0 +1,26 @@
+{
+  "name": "docuflow",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/documents.test.mjs"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
+    "buffer": "6.0.3",
+    "docx": "9.5.1",
+    "jszip": "3.10.1",
+    "mammoth": "1.9.1",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  },
+  "description": "Atelier PDF en français : fusion, conversion, extraction et annotation, avec traitement local dans le navigateur.",
+  "engines": {
+    "node": ">=22"
+  }
+}

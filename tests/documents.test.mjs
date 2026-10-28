@@ -1,0 +1,15 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {PDFDocument} from 'pdf-lib';
+import JSZip from 'jszip';
+import {inspectFile,mergePdfs,extractText,textToPdf,textToDocx,annotatePdf,pdfjs} from '../src/documents.js';
+pdfjs.GlobalWorkerOptions.workerSrc=new URL('../node_modules/pdfjs-dist/build/pdf.worker.mjs',import.meta.url).href;
+globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>{const b=await fs.readFile(new URL('../public/assets/document-font.ttf',import.meta.url));return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)}});
+async function sample(label,pages=1){const pdf=await PDFDocument.create();for(let i=0;i<pages;i++)pdf.addPage().drawText(label+' page '+(i+1));return inspectFile(new File([await pdf.save()],label+'.pdf'));}
+test('fusion preserves page count and supplied order',async()=>{const a=await sample('FIRST'),b=await sample('SECOND',2);const bytes=await mergePdfs([b,a]);assert.equal((await PDFDocument.load(bytes)).getPageCount(),3);const entry=await inspectFile(new File([bytes],'merged.pdf'));const text=await extractText(entry);assert.ok(text.indexOf('SECOND')<text.indexOf('FIRST'));});
+test('unicode text survives PDF creation and extraction',async()=>{const text='Liberté, été, cœur : un document modifié.';const bytes=await textToPdf(text);const entry=await inspectFile(new File([bytes],'new.pdf'));assert.equal((await extractText(entry)).trim(),text);});
+test('DOCX output contains editable text and can be extracted again',async()=>{const text='Bonjour, liberté et philosophie.';const blob=await textToDocx(text);const zip=await JSZip.loadAsync(await blob.arrayBuffer());assert.match(await zip.file('word/document.xml').async('string'),/philosophie/);const entry=await inspectFile(new File([blob],'document.docx'));assert.equal((await extractText(entry)).trim(),text);});
+test('annotation, rotation and page selection preserve original text',async()=>{const entry=await sample('SOURCE',2);const state={pages:[{original:1,rotation:90,annotations:[{text:'Validé',x:10,y:15,size:16,color:'#ea603a'}]}]};const bytes=await annotatePdf(entry,state);const pdf=await PDFDocument.load(bytes);assert.equal(pdf.getPageCount(),1);assert.equal(pdf.getPage(0).getRotation().angle,90);const edited=await inspectFile(new File([bytes],'edited.pdf'));const text=await extractText(edited);assert.match(text,/SOURCE page 2/);assert.match(text,/Validé/);});
+test('corrupt PDF, invalid DOCX and empty formats are rejected',async()=>{await assert.rejects(inspectFile(new File(['invalid'],'bad.pdf')),/PDF/);await assert.rejects(inspectFile(new File(['invalid'],'bad.docx')),/DOCX/);await assert.rejects(inspectFile(new File(['invalid'],'bad.exe')),/Format/);});
+test('text export wraps long lines onto multiple pages',async()=>{const text=Array(300).fill('Une longue phrase avec des accents et un peu de philosophie.').join('\n');assert.ok((await PDFDocument.load(await textToPdf(text))).getPageCount()>1);});
