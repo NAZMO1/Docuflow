@@ -90,7 +90,7 @@ export async function pdfToImages(entry,onProgress=()=>{}){
 }
 export async function annotatePdf(entry,state){
  const original=await PDFDocument.load(entry.bytes),pdf=await PDFDocument.create();
- const pages=await pdf.copyPages(original,state.pages.map(p=>p.original));const font=state.pages.some(p=>p.annotations.length)?await fontFor(pdf):null;
+ const pages=[];for(const spec of state.pages){const [page]=await pdf.copyPages(original,[spec.original]);pages.push(page);}const font=state.pages.some(p=>p.annotations.length)?await fontFor(pdf):null;
  pages.forEach((page,i)=>{
   const spec=state.pages[i];pdf.addPage(page);page.setRotation(degrees((page.getRotation().angle+spec.rotation)%360));
   const {width,height}=page.getSize();
