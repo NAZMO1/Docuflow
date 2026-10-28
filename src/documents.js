@@ -93,9 +93,9 @@ export async function annotatePdf(entry,state){
  const pages=[];for(const spec of state.pages){const [page]=await pdf.copyPages(original,[spec.original]);pages.push(page);}const font=state.pages.some(p=>p.annotations.length)?await fontFor(pdf):null;
  pages.forEach((page,i)=>{
   const spec=state.pages[i];pdf.addPage(page);page.setRotation(degrees((page.getRotation().angle+spec.rotation)%360));
-  const {width,height}=page.getSize();
-  for(const note of spec.annotations){const color=note.color.replace('#','');const c=rgb(parseInt(color.slice(0,2),16)/255,parseInt(color.slice(2,4),16)/255,parseInt(color.slice(4,6),16)/255);
-   page.drawText(clean(note.text),{x:width*note.x/100,y:height*(1-note.y/100)-note.size,size:note.size,font,color:c,maxWidth:width*(1-note.x/100)-10,lineHeight:note.size*1.3});
+  const {x:cropX,y:cropY,width,height}=page.getCropBox();
+  for(const note of spec.annotations){if(!note.text.trim())continue;const color=note.color.replace('#','');const c=rgb(parseInt(color.slice(0,2),16)/255,parseInt(color.slice(2,4),16)/255,parseInt(color.slice(4,6),16)/255);
+   page.drawText(clean(note.text),{x:cropX+width*note.x/100,y:cropY+height*(1-note.y/100)-note.size,size:note.size,font,color:c,maxWidth:width*(1-note.x/100)-10,lineHeight:note.size*1.3});
   }
  });return pdf.save();
 }

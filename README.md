@@ -1,6 +1,6 @@
 <div align="center">
 
-![Docuflow — L’atelier de vos documents](assets/banner.svg)
+![DocFlow — L’atelier de vos documents](assets/banner.svg)
 
 **Un atelier de documents en français, accessible depuis le navigateur.**
 
@@ -12,9 +12,9 @@
 
 </div>
 
-## Pourquoi Docuflow ?
+## Pourquoi DocFlow ?
 
-Assembler des justificatifs, récupérer le texte d’un document ou ajouter une annotation ne devrait pas obliger à installer un logiciel. Docuflow réunit ces opérations dans une interface unique, avec un principe : **les fichiers sont traités en mémoire sur l’appareil de l’utilisateur, sans être envoyés à un serveur de conversion**.
+Assembler des justificatifs, récupérer le texte d’un document ou ajouter une annotation ne devrait pas obliger à installer un logiciel. DocFlow réunit ces opérations dans une interface unique, avec un principe : **les fichiers sont traités en mémoire sur l’appareil de l’utilisateur, sans être envoyés à un serveur de conversion**.
 
 Exemple : importer plusieurs PDF, choisir leur ordre, les fusionner puis récupérer un document prêt à transmettre.
 
@@ -122,3 +122,12 @@ Ces éléments sont envisagés et **ne sont pas encore implémentés** :
 ## Auteur et dépendances
 
 Projet de **[NAZMO1](https://github.com/NAZMO1)**. Les bibliothèques et la police conservent leurs licences respectives ; voir [les dépendances](docs/TECHNIQUE.md#dépendances-et-licences) et [la licence de la police](public/assets/FONT-LICENSE.txt). Aucune licence de redistribution n’a encore été choisie pour le code propre du projet.
+
+
+### Édition directe sur le PDF
+
+Cliquez sur la page pour ajouter une zone de texte, puis écrivez et corrigez directement dans l’aperçu. La poignée permet de déplacer le texte ; les ajouts peuvent être supprimés et les modifications annulées. Le bouton « Voir le PDF final » affiche le rendu exporté. Les pages peuvent être tournées, déplacées, dupliquées et retirées.
+
+L’édition directe concerne les textes ajoutés pendant la session. Le texte original du PDF reste inchangé. Téléchargez le résultat pour conserver les modifications.
+
+Validation de cette version : 8 tests du moteur passent, dont les annotations indépendantes sur les pages dupliquées et le placement sur une page recadrée et tournée. Écriture, déplacement, aperçu final et annulation essayés dans le navigateur. La récupération du téléchargement par le navigateur de test distant reste à confirmer.
