@@ -2,52 +2,68 @@
 
 ## Répartition du code
 
-`src/app.js` gère la navigation entre outils, les fichiers importés, les actions disponibles, les messages, l’historique des résultats et les URLs temporaires. L’interface désactive les contrôles pendant les traitements principaux.
+- `src/app.js` : navigation, import local, édition sur page, annotations et aperçu.
+- `src/toolbox.js` : outils complémentaires, contrôles de paramètres et recettes.
+- `src/documents.js` : lecture, rendu, transformation et export des documents.
+- `tests/documents.test.mjs` : transformations, structure et contenu.
+- `tests/visual.test.mjs` : rendu, corrections, retrait de zones, compression et signature.
+- `build.mjs` : copie des assets locaux et bundle navigateur avec esbuild.
 
-`src/documents.js` réalise les opérations sur les formats. Le worker PDF.js est copié dans les assets et référencé relativement au bundle. Une police locale est incorporée aux PDF créés pour prendre en charge notamment les accents français.
+Le worker PDF.js, les bibliothèques et la police sont servis avec l’application. Aucun CDN ni service de conversion distant n’est requis à l’exécution.
 
-`build.mjs` recrée `dist/`, copie les assets de `public/`, ajoute le worker et génère le bundle JavaScript navigateur. `dist/` et `node_modules/` ne doivent pas être versionnés.
+## Correction sans conversion en texte
+
+L’import d’un PDF unique ouvre l’éditeur visuel. PDF.js fournit les fragments de texte horizontaux et leurs coordonnées. La correction mémorise le rectangle, la position de ligne de base, la nouvelle chaîne et les couleurs.
+
+À l’export, pdf-lib crée un nouveau document. Une page corrigée est rendue en PNG (jusqu’à 2×, maximum 2 600 pixels sur le côté long), placée dans une nouvelle page de mêmes dimensions et de même crop box ; la zone est effacée puis le nouveau texte est ajouté. La rotation est conservée. Les autres pages sont copiées. Le flux textuel original de la page corrigée n’est pas incorporé dans cette page de sortie.
+
+La taille du remplacement est réduite si nécessaire pour tenir dans le rectangle ; un texte qui nécessiterait une taille inférieure à 5 points est refusé. Les textes verticaux, les scans, les fonds texturés et les polices spécifiques ne sont pas reconstruits à l’identique. Les annotations simples ajoutent du contenu sans effacer le contenu sous-jacent. L’onglet de texte extrait produit volontairement un nouveau document avec une nouvelle mise en page.
+
+## Outils et compromis
+
+- Extraction : plages validées, dédoublonnées, ordre demandé ; ZIP d’un PDF par page.
+- Formulaires : champs AcroForm existants, texte/cases/listes, apparences actualisées ; pas de XFA ni de création de champs. Utiliser l’outil dédié pour conserver les formulaires interactifs.
+- Compression : rendu JPEG, perte du texte sélectionnable, des liens et des champs ; comparaison des poids et avertissement si le résultat est plus lourd.
+- Retrait de zone : page aplatie avec rectangle noir. Vérifier les autres occurrences et les autres pages. Les pièces jointes du PDF ne sont pas reprises.
+- Rognage : modification de la crop box ; le contenu extérieur reste récupérable et n’est pas censuré.
+- Métadonnées : inspection des informations documentaires et copie des pages dans un nouveau document pour retirer les anciennes informations de document. Ce n’est pas un anonymiseur du contenu visible.
+- Comparaison : même page dans deux fichiers, rendus côte à côte et pixels différents en orange si les dimensions correspondent. Aucun jugement sémantique.
+- Signature : dessin PNG ; aucune certification ni validation cryptographique.
+- Recettes : réglages génériques dans localStorage sur demande ; documents en mémoire seulement.
 
 ## Import et mémoire
 
-Les fichiers sont chargés en mémoire. Le type est d’abord déterminé par l’extension, puis validé par le parseur adapté ; les images sont décodées. L’import d’un DOCX vérifie sa structure ZIP et limite sa taille décompressée déclarée. Ces contrôles ne constituent pas une garantie de sécurité exhaustive pour tout fichier malformé.
+Validation des formats, tailles et nombre de pages. Pour DOCX, vérification de la structure ZIP et de la taille décompressée déclarée. Ces garde-fous ne garantissent pas la prise en charge de tout document complexe ou malformé.
 
-Les seuils de taille et de pages sont des garde-fous. Des PDF complexes peuvent consommer davantage de mémoire que ne le suggère leur taille sur disque. Pour une exploitation à grande échelle, compléter les essais avec de nombreux cas réels et auditer les dépendances.
+Limites : 50 Mo par fichier, 100 Mo par opération, 30 fichiers, 300 pages PDF ; 80 pages pour la compression, 150 pour l’export PNG. PDF protégés par mot de passe refusés. Une modification peut invalider une signature numérique existante.
 
-## Export et durée de vie
+## Développer et déployer
 
-Les résultats deviennent des Blob avec une URL temporaire. Les douze derniers résultats restent accessibles dans la session. Les URLs les plus anciennes sont révoquées ; les fichiers ne sont pas sauvegardés côté serveur. Le navigateur reste responsable du téléchargement sur disque.
-
-## Déployer ailleurs
+Node.js 22 ou supérieur avec les dépendances optionnelles activées pour les tests de rendu :
 
 ```bash
 npm ci
 npm test
 npm run build
+python3 -m http.server 8000 --directory dist
 ```
 
-Publier le contenu de `dist/` sur un hébergement statique avec HTTPS et les types MIME appropriés, notamment JavaScript pour `.js` et `.mjs`. Le worker PDF.js doit être servi depuis la même origine. Les chemins relatifs permettent un déploiement dans un sous-dossier.
+Les tests visuels utilisent `@napi-rs/canvas`, dépendance optionnelle de PDF.js. Ils ne génèrent pas de fichiers dans un répertoire propre à la machine de développement.
 
-La configuration spécifique du site déjà publié, les identifiants d’hébergement et les informations de session ne sont pas inclus dans cet export GitHub. Copier ce code n’altère pas le site actuellement en ligne.
+Publier `dist/` sur un hébergement statique HTTPS avec les types MIME appropriés pour `.js` et `.mjs`. Le worker doit rester accessible depuis la même origine. Les chemins relatifs autorisent un sous-dossier. Ne pas versionner `dist/`, `node_modules/`, les secrets ou les informations de session. Les paramètres Sites du site déjà publié ne sont pas inclus dans cet export GitHub.
+
+## Validation
+
+18 tests : fusion, Unicode, DOCX, rejet des formats incorrects, sélection et duplication des pages, coordonnées avec crop/rotation, plages invalides, ZIP, filigrane/pagination, formulaires, métadonnées, corrections et rasterisation. Le contrôle visuel tolère moins de 0,5 % de pixels différents hors du rectangle corrigé, avec un seuil de différence de rendu. L’absence de l’ancien passage et la présence de la correction dans le texte extractible sont vérifiées.
+
+L’interface minifiée a été essayée pour le repérage et la correction, les formulaires et la comparaison. Le téléchargement par l’événement du navigateur distant a expiré : les tests des octets générés ne valident pas tous les comportements de téléchargement des navigateurs.
 
 ## Dépendances et licences
 
-Consulter les fichiers de licence distribués avec les versions verrouillées dans `package-lock.json` :
+Les versions sont verrouillées dans `package-lock.json` : pdf-lib, PDF.js, fontkit, JSZip, Mammoth, docx, Buffer et esbuild. DejaVu Sans est distribuée avec [sa licence](../public/assets/FONT-LICENSE.txt). Les tests visuels utilisent également les composants natifs optionnels de PDF.js. Le build conserve les notices de licence liées d’esbuild : ne pas les retirer lors du déploiement.
 
-| Dépendance | Usage |
-| --- | --- |
-| pdf-lib | Création et copie de pages, annotations et rotation. |
-| PDF.js (`pdfjs-dist`) | Lecture, extraction et rendu des PDF. |
-| fontkit (`@pdf-lib/fontkit`) | Incorporation de police dans les PDF. |
-| JSZip | Lecture des structures DOCX et création du ZIP d’images. |
-| Mammoth | Extraction du texte des DOCX. |
-| docx | Création de documents Word éditables. |
-| Buffer | Compatibilité de dépendances dans le bundle navigateur. |
-| esbuild | Construction du bundle. |
-| DejaVu Sans | Police locale ; licence dans `public/assets/FONT-LICENSE.txt`. |
+Aucune licence de redistribution n’a été choisie pour le code propre au projet.
 
-Le bundle conserve les commentaires légaux via le mécanisme `legalComments: linked` d’esbuild. Ne pas supprimer les fichiers de notices générés lors du déploiement.
+## Évolutions nécessitant un moteur supplémentaire
 
-## Fonctions nécessitant une autre architecture
-
-La monétisation avec droits premium demanderait une vérification des paiements et des autorisations côté serveur. Une signature répondant aux exigences d’une plateforme officielle demanderait une intégration avec un prestataire adapté. Ces fonctions ne font pas partie de cette version.
+OCR, conversion Office fidèle, PDF/A, IA et chiffrement ne sont pas implémentés. Les paiements et droits premium demanderaient des contrôles côté serveur. Les propositions de compression à poids cible et de détection automatique des défauts restent des pistes, pas des fonctions actives.

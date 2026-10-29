@@ -2,132 +2,78 @@
 
 ![DocFlow — L’atelier de vos documents](assets/banner.svg)
 
-**Un atelier de documents en français, accessible depuis le navigateur.**
+**Atelier PDF local : correction visuelle, outils PDF et dossiers prêts à partager.**
 
-[Faire un essai](https://docuflow-nazmo.adeptmole259.chatgpt.site/) · [Présentation du projet](docs/PRESENTATION.md) · [Architecture et limites](docs/TECHNIQUE.md)
-
-![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-f7df1e?logo=javascript&logoColor=black)
-![PDF](https://img.shields.io/badge/PDF-traitement_local-eb643c)
-![Framework](https://img.shields.io/badge/Interface-HTML_%2F_CSS_%2F_JS-5685d5)
+[Essayer DocFlow](https://docuflow-nazmo.adeptmole259.chatgpt.site/) · [Présentation](docs/PRESENTATION.md) · [Architecture](docs/TECHNIQUE.md)
 
 </div>
 
-## Pourquoi DocFlow ?
+> Projet personnel développé avec assistance IA. Prototype fonctionnel : les limites sont décrites ci-dessous.
 
-Assembler des justificatifs, récupérer le texte d’un document ou ajouter une annotation ne devrait pas obliger à installer un logiciel. DocFlow réunit ces opérations dans une interface unique, avec un principe : **les fichiers sont traités en mémoire sur l’appareil de l’utilisateur, sans être envoyés à un serveur de conversion**.
+# DocFlow — Atelier PDF local
 
-Exemple : importer plusieurs PDF, choisir leur ordre, les fusionner puis récupérer un document prêt à transmettre.
+DocFlow traite les documents en mémoire dans le navigateur. Les fichiers ne sont pas téléversés et les dépendances sont distribuées avec l’application.
 
-> Projet personnel développé avec assistance IA. Les fonctionnalités présentées correspondent à la version actuelle ; il s’agit d’un prototype fonctionnel, pas d’une suite bureautique complète.
+## Modification avec conservation de l’aspect
 
-## Ce que l’on peut faire
+Le parcours d’import d’un PDF unique ouvre désormais l’éditeur visuel. « Repérer les textes de cette page » expose les passages horizontaux sélectionnables ; choisir un passage, saisir la correction puis appliquer. L’aperçu et l’export utilisent le même moteur.
 
-| Outil | Fonctionnalités disponibles |
-| --- | --- |
-| **Fusionner** | Réunir plusieurs PDF, changer l’ordre des fichiers et choisir le nom du résultat. |
-| **Convertir** | PDF → PNG dans un ZIP, PDF → TXT, PDF → DOCX à partir du texte, JPG/PNG → PDF et TXT/DOCX → PDF. |
-| **Extraire** | Récupérer le texte sélectionnable des PDF et le texte des DOCX/TXT, le copier ou le télécharger. |
-| **Modifier** | Ajouter des annotations textuelles avec position, taille et couleur ; tourner ou retirer des pages ; annuler une action ; visualiser la page. |
-| **Réécrire** | Modifier le texte extrait ou écrire un nouveau document, puis exporter en PDF, DOCX ou TXT. |
+Les corrections conservent l’aspect de la page, pas sa structure vectorielle : seules les pages corrigées sont rendues en PNG (maximum 2 600 pixels sur le côté long, jusqu’à 2× la taille en points), la zone d’origine est effacée puis le texte corrigé est ajouté à sa position. Le flux de contenu original de ces pages n’est pas copié. Les autres pages sont copiées comme pages PDF. La police embarquée de remplacement peut différer ; la taille est réduite pour tenir dans la zone, avec refus si elle devient inférieure à 5 points. Le fond de la zone est configurable ; les fonds texturés et les textes verticaux ne sont pas reconstruits. Aucun OCR n’est réalisé.
 
-L’interface propose aussi le glisser-déposer, un affichage adapté au mobile, des erreurs explicites et un historique en mémoire des douze derniers résultats.
+L’onglet « Nouveau document à partir du texte » reste une conversion volontaire avec une nouvelle mise en page. Les annotations simples ajoutent du contenu sans retirer le contenu sous-jacent.
 
-## Démarrage local
+## Outils
 
-Prérequis : **Node.js 22 ou supérieur**, npm et Python 3 pour le serveur de démonstration ci-dessous.
+- Fusion, organisation, retrait, duplication, rotation et réordonnancement des pages ; annulation des opérations de l’éditeur.
+- Extraction par plages, pages impaires/paires, ordre inverse, ou ZIP d’un PDF par page.
+- Filigrane textuel, pagination, rognage par marges.
+- Signature dessinée (visuelle, sans certificat).
+- Remplissage des champs texte, cases et listes des formulaires AcroForm existants, sans aplatissement ; pas de XFA ni de création de champs.
+- Comparaison côte à côte avec différences de pixels en orange ; le résultat est sensible aux différences de rendu et n’est pas une comparaison sémantique.
+- Compression par rasterisation JPEG, qualité configurable et comparaison du poids ; le résultat peut être plus lourd et perd texte sélectionnable, liens et formulaires.
+- Retrait d’une zone noire par rasterisation de la page concernée. Vérifier toutes les occurrences de l’information et les autres pages. Le rognage ne constitue pas une suppression de données.
+- Contrôle des métadonnées, dimensions, rotations et champs ; export JSON ; nettoyage des métadonnées documentaires par copie des pages dans un nouveau document.
+- PDF → PNG ZIP, PDF → TXT, PDF → DOCX texte ; JPG/PNG → PDF ; DOCX/TXT → PDF texte.
 
-Dans le dossier du projet :
+## Parcours DocFlow
 
-```bash
+- **Dossier candidature** : assembler les pièces dans l’ordre choisi avec un sommaire facultatif indiquant la première page de chaque fichier.
+- **Recette de partage** : enchaîner nettoyage des métadonnées, filigrane et pagination. Seuls les réglages génériques sont enregistrés dans localStorage si demandé, jamais les documents.
+- **Contrôle avant envoi** : rapport local et aperçu du PDF réellement exporté dans les nouveaux outils.
+
+Ces parcours sont des ajouts adaptés à DocFlow ; aucune exclusivité par rapport à d’autres logiciels n’est revendiquée.
+
+## Limites
+
+Les fonctions d’iLovePDF ont été examinées sur https://www.ilovepdf.com/ et sa documentation. Cette version n’en reproduit pas toute la couverture : OCR, conversions Office fidèles (Word/Excel/PowerPoint), PDF/A, traduction/résumé IA, chiffrement/déchiffrement, réparation des PDF corrompus et signature électronique certifiée ne sont pas implémentés. Pas de boutons factices pour ces fonctions.
+
+50 Mo par fichier, 100 Mo par opération, 30 fichiers, 300 pages PDF ; compression limitée à 80 pages, export PNG à 150 pages ; images de 40 millions de pixels au maximum. Les documents protégés par mot de passe ne sont pas pris en charge. Une modification peut invalider les signatures numériques présentes. La copie de pages pour l’organisation ou l’aplatissement n’est pas destinée à préserver une structure AcroForm complexe : utiliser l’outil dédié pour remplir un formulaire. Les fichiers et les téléchargements de session disparaissent au rechargement.
+
+## Développement et validation
+
+```sh
 npm ci
 npm run build
-python3 -m http.server 8000 --directory dist
-```
-
-Ouvrir **http://localhost:8000**. Un autre serveur HTTP statique peut remplacer Python.
-
-Le build produit `dist/`, prêt à être hébergé comme site statique. Les chemins sont relatifs, y compris celui du worker PDF.js, pour permettre un hébergement dans un sous-dossier. Aucun secret, compte fournisseur ni clé API n’est nécessaire au fonctionnement actuel.
-
-## Vérification
-
-```bash
 npm test
 ```
 
-Les **six tests automatisés** portent sur :
+Servir `dist/` via HTTP, par exemple `python3 -m http.server 8000 --directory dist`, puis ouvrir http://localhost:8000. Node.js 22 ou supérieur est requis. Le moteur et les workers PDF ainsi que la police sont locaux. Les tests visuels Node utilisent la dépendance optionnelle `@napi-rs/canvas` de PDF.js.
 
-1. Le nombre et l’ordre des pages d’une fusion.
-2. La conservation du texte accentué dans un PDF généré.
-3. La création d’un DOCX et l’extraction de son texte.
-4. Les annotations, la rotation et la sélection des pages, sans perte du texte source.
-5. Le rejet de fichiers PDF/DOCX invalides et de formats non pris en charge.
-6. La pagination d’un long texte.
+18 tests couvrent notamment : ordre d’extraction, plages invalides, ZIP, fusion, DOCX, Unicode, pagination, filigrane, formulaires interactifs, métadonnées, rognage, corrections de texte, retrait de zone, rotation et compression. Un test de comparaison de pixels vérifie que les différences hors de la zone corrigée restent inférieures à 0,5 % avec un seuil de tolérance de rendu. Il vérifie aussi l’absence du texte remplacé dans le texte extractible de la page.
 
-La version du 28 octobre 2026 a également été essayée dans le navigateur sur les quatre outils, avec contrôle de l’affichage à une largeur mobile. Les fichiers de résultat et leurs liens ont été produits. La récupération du téléchargement par l’outil de test distant a rencontré un délai d’attente : ce dernier point n’a pas été validé de bout en bout.
+Les parcours navigateur ont confirmé le repérage, la correction, la production du PDF et la détection des champs dans le bundle minifié. Le téléchargement via l’événement du navigateur distant a expiré ; les tests locaux contrôlent les octets générés, mais ne constituent pas une vérification du dialogue de téléchargement sur chaque navigateur.
 
-## Comment ça fonctionne
+## Structure
 
-```mermaid
-flowchart TD
-    A["Import local"] --> B["Validation des fichiers"]
-    B --> C["Traitement dans le navigateur"]
-    C --> D["Aperçu ou texte éditable"]
-    D --> E["Création du fichier et lien de téléchargement"]
-```
+- `src/app.js` : atelier principal et éditeur visuel.
+- `src/toolbox.js` : outils complémentaires et recettes.
+- `src/documents.js` : transformations PDF et documents.
+- `tests/` : contrôles de contenu et rendu.
+- `public/` : interface et assets locaux.
+- Les paramètres propres à l’hébergement du site ne sont pas inclus dans cet export.
 
-| Élément | Technologie | Rôle |
-| --- | --- | --- |
-| Interface | HTML, CSS, JavaScript natif | Navigation, import, état et accessibilité. |
-| PDF | pdf-lib, PDF.js, fontkit | Assemblage, création, annotation, extraction et rendu. |
-| Word | Mammoth, docx | Extraction du texte DOCX et création de documents éditables. |
-| Archives | JSZip | Export des pages PNG dans une archive ZIP. |
-| Build | esbuild | Bundle navigateur et assemblage des assets. |
-| Tests | `node:test` | Vérification du contenu réel des documents. |
+Licences des bibliothèques conservées : pdf-lib, PDF.js, JSZip, Mammoth, docx, fontkit, Buffer et DejaVu.
 
-## Confidentialité et limites
+## Auteur
 
-- **Pas d’upload de documents** dans la version actuelle. Les outils, les styles et la police sont servis par le site ; aucun CDN tiers n’est nécessaire à son exécution.
-- **Pas d’OCR** : un scan sans couche de texte ne peut pas être transcrit.
-- **Conversions textuelles simplifiées** : les images, tableaux et mises en page d’origine ne sont pas conservés dans PDF → DOCX ou TXT/DOCX → PDF.
-- **Annotation, pas remplacement du texte PDF** : l’éditeur ajoute du contenu et ne fournit pas de caviardage sécurisé.
-- **Pas de signature électronique certifiée**, de paiement ou de publicité intégrée.
-- Les PDF protégés par mot de passe ne sont pas pris en charge. Une modification peut invalider une signature existante.
-- Les fichiers et résultats ne sont pas persistés : ils disparaissent à la fermeture ou au rechargement de la page.
-
-Limites actuelles : **50 Mo/fichier**, **100 Mo/opération**, **30 fichiers**, **300 pages PDF** au total, **150 pages** pour PNG, **40 millions de pixels/image** et **500 000 caractères** pour la création de documents texte. La prise en charge de chaque fichier complexe n’est pas garantie.
-
-## Structure du dépôt
-
-```text
-assets/banner.svg          Présentation du projet
-public/index.html          Structure de l’interface
-public/assets/             Styles et police locale
-src/app.js                 Interactions, état et téléchargements
-src/documents.js           Transformations de documents
-tests/documents.test.mjs  Tests du contenu produit
-build.mjs                  Génération de dist/
-docs/                      Présentation et documentation technique
-```
-
-## Pistes d’évolution
-
-Ces éléments sont envisagés et **ne sont pas encore implémentés** :
-
-- [ ] OCR pour les documents scannés.
-- [ ] Réorganisation visuelle des pages PDF.
-- [ ] Amélioration de la fidélité des conversions bureautiques.
-- [ ] Tests navigateur automatisés des téléchargements.
-- [ ] Déploiement et vérifications automatisés sur GitHub.
-
-## Auteur et dépendances
-
-Projet de **[NAZMO1](https://github.com/NAZMO1)**. Les bibliothèques et la police conservent leurs licences respectives ; voir [les dépendances](docs/TECHNIQUE.md#dépendances-et-licences) et [la licence de la police](public/assets/FONT-LICENSE.txt). Aucune licence de redistribution n’a encore été choisie pour le code propre du projet.
-
-
-### Édition directe sur le PDF
-
-Cliquez sur la page pour ajouter une zone de texte, puis écrivez et corrigez directement dans l’aperçu. La poignée permet de déplacer le texte ; les ajouts peuvent être supprimés et les modifications annulées. Le bouton « Voir le PDF final » affiche le rendu exporté. Les pages peuvent être tournées, déplacées, dupliquées et retirées.
-
-L’édition directe concerne les textes ajoutés pendant la session. Le texte original du PDF reste inchangé. Téléchargez le résultat pour conserver les modifications.
-
-Validation de cette version : 8 tests du moteur passent, dont les annotations indépendantes sur les pages dupliquées et le placement sur une page recadrée et tournée. Écriture, déplacement, aperçu final et annulation essayés dans le navigateur. La récupération du téléchargement par le navigateur de test distant reste à confirmer.
+Projet de [NAZMO1](https://github.com/NAZMO1). Aucune licence de redistribution n’a encore été choisie pour le code propre au projet. Les dépendances conservent leurs licences ; voir [la documentation technique](docs/TECHNIQUE.md#dépendances-et-licences).

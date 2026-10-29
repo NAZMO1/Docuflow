@@ -1,57 +1,46 @@
-# Docuflow — Présentation du projet
-
-## En une phrase
-
-Docuflow est un atelier de documents en français qui permet de fusionner, convertir, extraire et annoter des fichiers directement dans le navigateur, sans les envoyer à un serveur de conversion.
+# DocFlow — Présentation du projet
 
 **Démonstration :** https://docuflow-nazmo.adeptmole259.chatgpt.site/
 
-## Le problème
+DocFlow est un atelier PDF en français qui traite les fichiers localement dans le navigateur : correction visuelle, organisation des pages, conversions simples, formulaires et préparation de dossiers.
 
-Les démarches de candidature et les échanges administratifs nécessitent souvent plusieurs opérations simples : réunir des pièces, changer un format, récupérer du texte ou ajouter une précision. L’utilisateur doit parfois jongler entre plusieurs logiciels ou services.
+## Le besoin
 
-## La solution
+Une candidature ou une démarche administrative impose souvent de réunir des pièces, corriger une information, ajouter des numéros et vérifier le document final. DocFlow rassemble ces étapes et permet de conserver les documents sur l’appareil.
 
-Une interface organise le travail autour de quatre actions : **fusionner, convertir, extraire et modifier**. L’utilisateur importe ses fichiers, prépare l’opération et récupère le résultat. Le traitement local limite les transferts de documents et permet de proposer les fonctions actuelles sans service de conversion distant.
+## Nouveautés
 
-## Exemple de démonstration en deux minutes
+- Corriger un passage directement sur une page PDF, sans recréer tout le document à partir du texte extrait.
+- Découper et extraire des pages, inverser leur ordre, sélectionner les pages paires ou impaires.
+- Ajouter filigranes et numéros, rogner, dessiner une signature.
+- Remplir des formulaires existants ; comparer deux PDF par leur rendu visuel.
+- Compresser par conversion en images, avec indication du poids obtenu et de la perte de texte sélectionnable.
+- Retirer une zone d’une page aplatie, inspecter et nettoyer les métadonnées documentaires.
 
-1. Ouvrir « Fusionner des PDF » et importer deux documents de démonstration.
-2. Modifier leur ordre et générer le PDF assemblé.
-3. Ouvrir « Extraire le texte » pour récupérer un passage d’un PDF contenant du texte sélectionnable.
-4. Choisir « Modifier ce texte », corriger une phrase puis exporter un nouveau document.
-5. Montrer l’annotation d’une page et expliquer la différence avec le remplacement du texte d’origine.
+## Parcours propres à l’atelier
 
-Utiliser des fichiers fictifs pour une démonstration publique.
+**Dossier candidature** assemble les pièces avec un sommaire facultatif qui indique la première page de chaque fichier. **Recette de partage** enchaîne nettoyage des métadonnées, filigrane et pagination ; les réglages génériques peuvent être mémorisés sur l’appareil. **Contrôle avant envoi** fournit un rapport sur les pages, leurs dimensions et les champs présents.
 
-## Compétences mises en pratique
+Ces parcours sont adaptés au positionnement de DocFlow. Leur exclusivité face aux autres logiciels n’est pas revendiquée.
 
-- Conception d’une interface responsive en HTML/CSS et JavaScript natif.
-- Manipulation de fichiers, Blob, URLs temporaires et téléchargements côté navigateur.
-- Orchestration de traitements asynchrones et verrouillage des actions pendant le travail.
-- Intégration de bibliothèques PDF, DOCX et ZIP.
-- Validation des formats et gestion d’erreurs.
-- Tests des documents produits : contenu, ordre, pagination et rotation.
-- Construction et publication d’un site statique.
+## Démonstration suggérée
 
-## État réel du projet
+1. Importer un PDF fictif dans « Modifier un document ».
+2. Repérer ses textes, choisir une adresse et appliquer une correction.
+3. Utiliser « Comparer à l’original » et « Voir le PDF final ».
+4. Préparer un dossier de candidature à partir de plusieurs PDF, avec sommaire.
+5. Ajouter une pagination ou un filigrane avec une recette de partage.
 
-Le prototype est déployé et les fonctions décrites dans le README sont implémentées. Six tests du moteur de documents passent. L’interface a été essayée avec de vrais fichiers de démonstration, sur ordinateur et à une largeur mobile. La récupération du téléchargement via l’outil navigateur distant reste à confirmer.
+Les corrections de texte aplatissent uniquement les pages concernées en images haute résolution. Leur aspect est conservé au mieux, mais la police de remplacement peut différer et le texte original de ces pages n’est plus sélectionnable. Le nouveau texte est ajouté à la position du passage corrigé. Cette limite doit être expliquée lors des démonstrations.
 
-Le projet a été développé avec assistance IA. Sa valeur technique doit être appréciée sur le fonctionnement du code, les vérifications et la capacité à expliquer les choix réalisés.
+## Compétences illustrées
 
-## Ce qu’il ne faut pas annoncer
+Interface responsive en HTML/CSS et JavaScript natif ; manipulation de fichiers et Blob ; traitements asynchrones ; intégration de moteurs PDF, DOCX et ZIP ; rendu avec PDF.js ; contrôles de formulaire ; tests de contenu et comparaison de pixels ; construction et publication statique.
 
-Docuflow ne conserve pas la mise en page de tous les formats, ne réalise pas d’OCR et ne propose pas de signature électronique certifiée. Il n’est pas présenté comme un remplacement complet de Word ou Acrobat, ni comme un produit déjà rentable. Aucun système de paiement ou de publicité n’est actif.
+## État et limites
 
-## Évolution possible
+18 tests automatisés couvrent les exports et plusieurs cas limites. Les parcours de correction, remplissage et comparaison ont été essayés dans le navigateur. La récupération du fichier par l’événement de téléchargement du navigateur distant a expiré ; ce mécanisme distant reste non validé de bout en bout. Les octets des exports sont contrôlés par les tests locaux.
 
-Une piste est de spécialiser l’outil dans la préparation de dossiers avec plusieurs pièces. Cette hypothèse doit être confrontée à des utilisateurs avant de développer une offre payante. Les priorités techniques suivantes seraient les tests de téléchargement, la manipulation visuelle des pages et l’OCR.
+Pas d’OCR, de conversions Office fidèles, de traduction/résumé IA, de chiffrement/déchiffrement, de réparation générale des PDF ou de signature certifiée. La compression actuelle rasterise les pages ; une compression qui préserve les liens et le texte sélectionnable reste une évolution future. Le ciblage d’un poids maximal n’est pas implémenté. Aucun paiement ni revenu récurrent n’est intégré.
 
-## Description courte pour le dépôt GitHub
-
-Atelier PDF en français : fusion, conversion, extraction et annotation de documents, avec traitement local dans le navigateur. JavaScript natif, PDF.js, pdf-lib et tests Node.js.
-
-## Topics GitHub suggérés
-
-`pdf` · `javascript` · `document-converter` · `pdf-lib` · `pdfjs` · `docx` · `privacy` · `client-side` · `french` · `portfolio`
+Projet personnel développé avec assistance IA. Son fonctionnement et ses limites sont documentés pour permettre une évaluation concrète.
