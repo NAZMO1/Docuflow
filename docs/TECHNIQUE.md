@@ -62,7 +62,7 @@ L’interface minifiée a été essayée pour le repérage et la correction, les
 
 Les versions sont verrouillées dans `package-lock.json` : pdf-lib, PDF.js, fontkit, JSZip, Mammoth, docx, Buffer et esbuild. DejaVu Sans est distribuée avec [sa licence](../public/assets/FONT-LICENSE.txt). Les tests visuels utilisent également les composants natifs optionnels de PDF.js. Le build conserve les notices de licence liées d’esbuild : ne pas les retirer lors du déploiement.
 
-Aucune licence de redistribution n’a été choisie pour le code propre au projet.
+La redistribution commerciale du code original de Docuflow requiert une autorisation écrite préalable. Voir les [conditions de redistribution](../LICENSE.md).
 
 ## Évolutions nécessitant un moteur supplémentaire
 

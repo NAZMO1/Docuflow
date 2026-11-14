@@ -76,4 +76,4 @@ Licences des bibliothèques conservées : pdf-lib, PDF.js, JSZip, Mammoth, docx,
 
 ## Auteur
 
-Projet de [NAZMO1](https://github.com/NAZMO1). Aucune licence de redistribution n’a encore été choisie pour le code propre au projet. Les dépendances conservent leurs licences ; voir [la documentation technique](docs/TECHNIQUE.md#dépendances-et-licences).
+Projet de [NAZMO1](https://github.com/NAZMO1). La redistribution commerciale du code original de Docuflow requiert une autorisation écrite préalable. Voir les [conditions de redistribution](LICENSE.md). Les dépendances conservent leurs licences ; voir [la documentation technique](docs/TECHNIQUE.md#dépendances-et-licences).
